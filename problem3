@@ -1,0 +1,14 @@
+N=10;
+x=-1+2.*rand(1,10);%generate x from -1 to 1;
+w_true=-1+2.*rand(4,1)%random choose parameters in the interval-1 to 1;
+sigma=10;%choose a large enough sigma
+v=normrnd(0,sigma,10,1);%generate the noise value
+y=zeros(1,10)
+for i=1:10
+    y(i)=w_true'*[x(i)^3;x(i)^2;x(i);1]+v(i)
+end
+plot(x,y,'go')
+D=[x;y];%iid samples
+gamma=0.1;%choose the value of gamma
+mu=zeros(4,1);
+Sigma=gamma^2*eye(4);
