@@ -1,14 +1,40 @@
+clear all clc
+
+syms x
 N=10;
-x=-1+2.*rand(1,10);%generate x from -1 to 1;
-w_true=-1+2.*rand(4,1)%random choose parameters in the interval-1 to 1;
-sigma=10;%choose a large enough sigma
-v=normrnd(0,sigma,10,1);%generate the noise value
-y=zeros(1,10)
-for i=1:10
-    y(i)=w_true'*[x(i)^3;x(i)^2;x(i);1]+v(i)
+x_i=-1+2.*rand(1,N);%generate x from -1 to 1;
+R=[-0.5 0 0.5];%three roots for the polynomial
+w_true=poly(R)';%solve the coefficient of the polynomial
+sigma=1;%choose a large enough sigma
+v=normrnd(0,sigma,1,100);%generate the noise value
+y=[x^3 x^2 x 1]*w_true;%generate the plot
+%pick 10 samples on the plot
+for i=1:N
+    h(i,:)=[x_i(i)^3 x_i(i)^2 x_i(i) 1];%h is 10x4
+    y_i(i)=h(i,:)*w_true;
 end
-plot(x,y,'go')
-D=[x;y];%iid samples
-gamma=0.1;%choose the value of gamma
-mu=zeros(4,1);
-Sigma=gamma^2*eye(4);
+%generate gamma from[10^-4 10^4]
+for s=-4:4
+    format long
+    gamma(s+5)=10^s
+end
+%generate w_MAP
+M=100;
+x_es=-1+2.*rand(1,M);%generate 100 samples
+% for s=1:M
+%     g(s,:)=[x_es(s)^3 x_es(s)^2 x_es(s) 1];%g is 10x4
+% end
+for i=1:length(gamma)
+    w_MAP(:,i)=inv(gamma(i)^2.*h'*h+sigma^2.*eye(4))*(gamma(i)^2.*h'*y_i')%w_MAP is 4x9
+    format short
+    error(i)=(norm(w_true-w_MAP(:,i)))^2%sove the L2 distance
+    y_es(:,i)=h*w_MAP(:,i);%y_es(i) is 10x1
+    for s=1:10
+        Y_es_Noise(s,:)=y_es(s,i)+v;%take 100 experiments
+    end
+end
+fplot(x,y,[-1,1])
+hold on
+plot(x_i,y_i,'bx')
+plot(x_i,Y_es_Noise,'go')
+hold off
