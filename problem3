@@ -20,19 +20,20 @@ for n=1:9
     gamma(n)=10^(n-5);
     s(n)=log10(gamma(n));
     %perform 100 experiments
-    while r<101
+    for r=1:100
         x_i=-1+2.*rand(1,N);%generate x from -1 to 1;
         v=normrnd(0,sigma,1,10);%generate the noise value,v is 1 x 10
         
         %pick 10 samples on the plot
         for i=1:N
             h(i,:)=[x_i(i)^3 x_i(i)^2 x_i(i) 1];%h is 10x4
-            y_i(i)=h(i,:)*w_true+v(i);
+            y_i(i)=h(i,:)*w_true;
         end  
-        w_MAP=inv(*h'*h+(sigma^2/gamma(n)^2).*eye(4))*(*h'*y_i');%w_MAP is 4x1
+        w_MAP=inv(h'*h+(sigma^2/gamma(n)^2).*eye(4))*(h'*y_i');%w_MAP is 4x1
+        disp(gamma(n))
+        disp(w_MAP)
         error=(norm(w_true-w_MAP))^2;%solve the L2 distance
-        E(:,r)=error;%E is 1x100 to record the error
-        r=r+1;    
+        E(:,r)=error;%E is 1x100 to record the error  
     end
     Min_Value(:,n)=min(E); %find the minimum value;
     Max_Value(:,n)=max(E);%find the maximum value;
@@ -43,13 +44,12 @@ for n=1:9
     plot(s(n),E,'go')
     hold on
 end
-plot(s,Min_Value,'r--','LineWidth',2)
-plot(s,Max_Value,'r--','LineWidth',2)
-plot(s,Median_Value,'r--','LineWidth',2)
-plot(s,Quarter_Value,'r--','LineWidth',2)
-plot(s,ThreeQuarter_Value,'r--','LineWidth',2)
+p1=plot(s,Min_Value,'--','LineWidth',2)
+p2=plot(s,Max_Value,'--','LineWidth',2)
+p3=plot(s,Median_Value,'--','LineWidth',2)
+p4=plot(s,Quarter_Value,'--','LineWidth',2)
+p5=plot(s,ThreeQuarter_Value,'--','LineWidth',2)
+legend([p1 p2 p3 p4 p5],'Min','Max','Median','25%','75%')
 xlabel('log10(gamma)')
 ylabel('||w_true-w_MAP||^2')
 hold off
-
-
