@@ -1,0 +1,32 @@
+clear all
+clc
+True=rand(1,2);%choose a true position
+r=1;%unit circle
+
+for k=1:4
+    theta=2*pi/k;
+    %generate the reference node
+    for i=1:k
+        x(i)=r*cos((i-1)*theta)
+        y(i)=r*sin((i-1)*theta)
+    end
+    d_Ti(i)=sqrt((True(1)-x(i))^2+(True(2)-y(i))^2)
+    
+    figure(k)
+    plot1(0,0,1)
+    hold on
+    plot(x,y,'ro')
+    axis([-2,2,-2,2])
+    xlabel('x')
+    ylabel('y')
+    
+end
+
+function [] = plot1( x,y,r )
+theta=0:0.001:2*pi;
+Circle1=x+r*cos(theta);
+Circle2=y+r*sin(theta);
+c=[123,14,52];
+plot(Circle1,Circle2,'c','linewidth',1);
+axis equal
+end
