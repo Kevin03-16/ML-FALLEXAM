@@ -1,40 +1,55 @@
-clear all clc
+clear all 
+clc
 
 syms x
 N=10;
-x_i=-1+2.*rand(1,N);%generate x from -1 to 1;
 R=[-0.5 0 0.5];%three roots for the polynomial
-w_true=poly(R)';%solve the coefficient of the polynomial
-sigma=1;%choose a large enough sigma
-v=normrnd(0,sigma,1,100);%generate the noise value
-y=[x^3 x^2 x 1]*w_true;%generate the plot
-%pick 10 samples on the plot
-for i=1:N
-    h(i,:)=[x_i(i)^3 x_i(i)^2 x_i(i) 1];%h is 10x4
-    y_i(i)=h(i,:)*w_true;
-end
-%generate gamma from[10^-4 10^4]
-for s=-4:4
-    format long
-    gamma(s+5)=10^s
-end
-%generate w_MAP
-M=100;
-x_es=-1+2.*rand(1,M);%generate 100 samples
-% for s=1:M
-%     g(s,:)=[x_es(s)^3 x_es(s)^2 x_es(s) 1];%g is 10x4
-% end
-for i=1:length(gamma)
-    w_MAP(:,i)=inv(gamma(i)^2.*h'*h+sigma^2.*eye(4))*(gamma(i)^2.*h'*y_i')%w_MAP is 4x9
-    format short
-    error(i)=(norm(w_true-w_MAP(:,i)))^2%sove the L2 distance
-    y_es(:,i)=h*w_MAP(:,i);%y_es(i) is 10x1
-    for s=1:10
-        Y_es_Noise(s,:)=y_es(s,i)+v;%take 100 experiments
-    end
-end
+w_true=poly(R)';%solve the coefficient of the polynomial,kept same 4x1
+% w_true=repmat(w,1,100); w_true is 4 x 100
+y=[x^3 x^2 x 1]*w_true;%generate the plot\
+H=zeros(4,4);
+HY=zeros(4,1);
+figure(1)
 fplot(x,y,[-1,1])
 hold on
-plot(x_i,y_i,'bx')
-plot(x_i,Y_es_Noise,'go')
+sigma=1;%choose a large enough sigma
+r=1;
+
+%generate gamma from[10^-4 10^4]
+for n=1:9
+    gamma(n)=10^(n-5);
+    s(n)=log10(gamma(n));
+    %perform 100 experiments
+    while r<101
+        x_i=-1+2.*rand(1,N);%generate x from -1 to 1;
+        v=normrnd(0,sigma,1,10);%generate the noise value,v is 1 x 10
+        
+        %pick 10 samples on the plot
+        for i=1:N
+            h(i,:)=[x_i(i)^3 x_i(i)^2 x_i(i) 1];%h is 10x4
+            y_i(i)=h(i,:)*w_true+v(i);
+        end  
+        w_MAP=inv(*h'*h+(sigma^2/gamma(n)^2).*eye(4))*(*h'*y_i');%w_MAP is 4x1
+        error=(norm(w_true-w_MAP))^2;%solve the L2 distance
+        E(:,r)=error;%E is 1x100 to record the error
+        r=r+1;    
+    end
+    Min_Value(:,n)=min(E); %find the minimum value;
+    Max_Value(:,n)=max(E);%find the maximum value;
+    Median_Value(:,n)=median(E);%find the median value;
+    Quarter_Value(:,n)=min(E)+(max(E)-min(E))/4;%find the 25% value
+    ThreeQuarter_Value(:,n)=min(E)+3*(max(E)-min(E))/4;%find the 75% value
+    figure(2)
+    plot(s(n),E,'go')
+    hold on
+end
+plot(s,Min_Value,'r--','LineWidth',2)
+plot(s,Max_Value,'r--','LineWidth',2)
+plot(s,Median_Value,'r--','LineWidth',2)
+plot(s,Quarter_Value,'r--','LineWidth',2)
+plot(s,ThreeQuarter_Value,'r--','LineWidth',2)
+xlabel('log10(gamma)')
+ylabel('||w_true-w_MAP||^2')
 hold off
+
+
