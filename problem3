@@ -11,6 +11,9 @@ H=zeros(4,4);
 HY=zeros(4,1);
 figure(1)
 fplot(x,y,[-1,1])
+ylabel('y')
+xlabel('x')
+title('the true curve')
 hold on
 sigma=1;%choose a large enough sigma
 r=1;
@@ -33,7 +36,7 @@ for n=1:9
         disp(gamma(n))
         disp(w_MAP)
         error=(norm(w_true-w_MAP))^2;%solve the L2 distance
-        E(:,r)=error;%E is 1x100 to record the error  
+        E(:,r)=error;%E is 1x100 to record the error
     end
     Min_Value(:,n)=min(E); %find the minimum value;
     Max_Value(:,n)=max(E);%find the maximum value;
@@ -52,4 +55,6 @@ p5=plot(s,ThreeQuarter_Value,'--','LineWidth',2)
 legend([p1 p2 p3 p4 p5],'Min','Max','Median','25%','75%')
 xlabel('log10(gamma)')
 ylabel('||w_true-w_MAP||^2')
+title('squared-error in different gamma')
 hold off
+
