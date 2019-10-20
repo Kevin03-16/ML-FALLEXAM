@@ -15,7 +15,7 @@ ylabel('y')
 xlabel('x')
 title('the true curve')
 hold on
-sigma=1;%choose a large enough sigma
+sigma=10;%choose a large enough sigma
 r=1;
 
 %generate gamma from[10^-4 10^4]
@@ -30,31 +30,33 @@ for n=1:9
         %pick 10 samples on the plot
         for i=1:N
             h(i,:)=[x_i(i)^3 x_i(i)^2 x_i(i) 1];%h is 10x4
-            y_i(i)=h(i,:)*w_true;
+            y_i(i)=h(i,:)*w_true+v(i);
         end  
         w_MAP=inv(h'*h+(sigma^2/gamma(n)^2).*eye(4))*(h'*y_i');%w_MAP is 4x1
-        disp(gamma(n))
-        disp(w_MAP)
         error=(norm(w_true-w_MAP))^2;%solve the L2 distance
         E(:,r)=error;%E is 1x100 to record the error
     end
+    E=sort(E,'ascend');
     Min_Value(:,n)=min(E); %find the minimum value;
     Max_Value(:,n)=max(E);%find the maximum value;
     Median_Value(:,n)=median(E);%find the median value;
-    Quarter_Value(:,n)=min(E)+(max(E)-min(E))/4;%find the 25% value
-    ThreeQuarter_Value(:,n)=min(E)+3*(max(E)-min(E))/4;%find the 75% value
+    Quarter_Value(:,n)=E(25);%find the 25% value
+    ThreeQuarter_Value(:,n)=E(75);%find the 75% value
+    
     figure(2)
-    plot(s(n),E,'go')
+    loglog(gamma(n),E,'go')
     hold on
 end
-p1=plot(s,Min_Value,'--','LineWidth',2)
-p2=plot(s,Max_Value,'--','LineWidth',2)
-p3=plot(s,Median_Value,'--','LineWidth',2)
-p4=plot(s,Quarter_Value,'--','LineWidth',2)
-p5=plot(s,ThreeQuarter_Value,'--','LineWidth',2)
+p1=loglog(gamma,Min_Value,'--','LineWidth',2)
+p2=loglog(gamma,Max_Value,'--','LineWidth',2)
+p3=loglog(gamma,Median_Value,'--','LineWidth',2)
+p4=loglog(gamma,Quarter_Value,'--','LineWidth',2)
+p5=loglog(gamma,ThreeQuarter_Value,'--','LineWidth',2)
 legend([p1 p2 p3 p4 p5],'Min','Max','Median','25%','75%')
-xlabel('log10(gamma)')
+xlabel('gamma')
 ylabel('||w_true-w_MAP||^2')
 title('squared-error in different gamma')
+grid on
 hold off
+
 
