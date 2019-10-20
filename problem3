@@ -1,11 +1,10 @@
-clear all 
+clear all,close all
 clc
 
 syms x
-N=10;
+N=10;%number of samples
 R=[-0.5 0 0.5];%three roots for the polynomial
 w_true=poly(R)';%solve the coefficient of the polynomial,kept same 4x1
-% w_true=repmat(w,1,100); w_true is 4 x 100
 y=[x^3 x^2 x 1]*w_true;%generate the plot\
 H=zeros(4,4);
 HY=zeros(4,1);
@@ -15,7 +14,7 @@ ylabel('y')
 xlabel('x')
 title('the true curve')
 hold on
-sigma=10;%choose a large enough sigma
+sigma=1;%choose a large enough sigma
 r=1;
 
 %generate gamma from[10^-4 10^4]
@@ -54,7 +53,7 @@ p4=loglog(gamma,Quarter_Value,'--','LineWidth',2)
 p5=loglog(gamma,ThreeQuarter_Value,'--','LineWidth',2)
 legend([p1 p2 p3 p4 p5],'Min','Max','Median','25%','75%')
 xlabel('gamma')
-ylabel('||w_true-w_MAP||^2')
+ylabel('Parameter Squared Error')
 title('squared-error in different gamma')
 grid on
 hold off
