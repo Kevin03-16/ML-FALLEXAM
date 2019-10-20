@@ -4,8 +4,8 @@ clc
 True=[0.25,0.3];%choose a true position
 mu=0; %mu for noise
 sigma=0.3;%sigma for noise
-sigma_x=0.5;%sigma x
-sigma_y=0.5;%sigma y
+sigma_x=0.25;%sigma x
+sigma_y=0.25;%sigma y
 horizontalGrid = linspace(-2,2,100);
 verticalGrid = linspace(-2,2,100);
 [h,v] = meshgrid(horizontalGrid,verticalGrid);
