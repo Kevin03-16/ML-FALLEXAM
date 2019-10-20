@@ -1,32 +1,59 @@
-clear all
+clear all, close all
 clc
-True=rand(1,2);%choose a true position
-r=1;%unit circle
 
+True=[0.25,0.3];%choose a true position
+mu=0; %mu for noise
+sigma=0.3;%sigma for noise
+sigma_x=0.5;%sigma x
+sigma_y=0.5;%sigma y
+horizontalGrid = linspace(-2,2,100);
+verticalGrid = linspace(-2,2,100);
+[h,v] = meshgrid(horizontalGrid,verticalGrid);
 for k=1:4
     theta=2*pi/k;
-    %generate the reference node
+    r=1;%unit circle
+    n=normrnd(mu,sigma,1,k);%noise
+    x_i=zeros(1,k);%reference x
+    y_i=zeros(1,k);%reference y
+    d_Ti=zeros(1,k);%distance between true point and reference point
+    R_i=zeros(1,k);%range measurement
     for i=1:k
-        x(i)=r*cos((i-1)*theta)
-        y(i)=r*sin((i-1)*theta)
+        %generate the reference node
+        x_i(i)=r*cos((i-1)*theta);
+        y_i(i)=r*sin((i-1)*theta);
+        %generate the true distance
+        d_Ti(i)=sqrt((True(1)-x_i(i))^2+(True(2)-y_i(i))^2);
+        %generate the measurement Rm
+        R_i(i)=d_Ti(i)+n(i);
+        
+        %evaluate the MAP estimation objective function on a grid
+        d(:,i)=sqrt((h(:)-x_i(i)).^2+(v(:)-y_i(i)).^2);
+        func(:,i)=(R_i(i)-d(:,i)).^2/(2*sigma^2);
     end
-    d_Ti(i)=sqrt((True(1)-x(i))^2+(True(2)-y(i))^2)
-    
-    figure(k)
-    plot1(0,0,1)
-    hold on
-    plot(x,y,'ro')
-    axis([-2,2,-2,2])
-    xlabel('x')
-    ylabel('y')
-    
+likelihood=(1/sigma^2)*sum(func,2);
+%function w to estimate MAP
+w=likelihood+0.5*((h(:)/sigma_x^2).^2+(v(:)/sigma_y^2).^2);
+wmin=min(w);%MAP estimation when w == min(w)
+ZGrid= reshape(w,100,100);
+figure(k), 
+plot1(0,0,1)%unit circle
+hold on
+plot(x_i,y_i,'ro','MarkerSize',6)%reference position
+plot(True(1),True(2),'bx','MarkerSize',8)%True position
+xlabel('x')
+ylabel('y')
+contour(horizontalGrid,verticalGrid,ZGrid,100); %contour
+legend('unit circle','reference position','True position','equilevel contours'), 
+title(['Equilevel contours of the MAP estimation objective for k=',num2str(k)]),
 end
 
+%draw circle
 function [] = plot1( x,y,r )
 theta=0:0.001:2*pi;
 Circle1=x+r*cos(theta);
 Circle2=y+r*sin(theta);
-c=[123,14,52];
-plot(Circle1,Circle2,'c','linewidth',1);
+% c=[123,14,52];
+plot(Circle1,Circle2,'linewidth',2);
 axis equal
 end
+
